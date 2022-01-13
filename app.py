@@ -1,4 +1,6 @@
-# Seu código aqui
+from itertools import count
+from flask import Flask, request, jsonify
+
 produtos = [
     {"id": 1, "name": "sabonete", "price": 5.99},
     {"id": 2, "name": "perfume", "price": 39.90},
@@ -31,3 +33,52 @@ produtos = [
     {"id": 29, "name": "coberta", "price": 55.99},
     {"id": 30, "name": "sofa", "price": 600.15}
 ]
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "<h1>Utilize essa aplicação para fazer algumas requisições!!!<h1>"
+
+@app.get("/products")
+def list_products():
+    return jsonify(produtos), 200
+
+@app.get("/products/<product_id>")
+def get(product_id: int):
+
+    for item in produtos:
+        if product_id == str(item["id"]):
+            return jsonify(item), 200
+
+    return f"<h1>Produto com id {product_id} não cadastrado<h1>", 404
+
+@app.post("/products")
+def create():
+    data = request.get_json()
+    data["id"] = len(produtos)+1
+    produtos.append(data)
+
+    return jsonify(data), 201 
+    
+
+@app.patch("/products/<product_id>")
+def updating(product_id: int):
+    data = request.get_json()
+    
+    for item in produtos:
+        if product_id == str(item["id"]):
+            for key in data:
+                item[key] = data[key]
+
+    return "", 204
+
+@app.delete("/products/<product_id>")
+def delete(product_id: int):
+   
+    for index, item in  enumerate(produtos):
+
+        if product_id == str(item["id"]):
+            produtos.pop(index)
+
+    return "", 204     
